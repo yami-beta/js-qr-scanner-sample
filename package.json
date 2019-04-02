@@ -1,0 +1,39 @@
+{
+  "name": "js-qr-scanner-sample",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "ssh://git@github.com/yami-beta/js-qr-scanner-sample",
+  "author": "yami-beta <yami-beta@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "lint:ts": "eslint --ext .ts,.tsx src/",
+    "lint": "run-p lint:*",
+    "build:ts": "webpack --mode production",
+    "watch:ts": "webpack-dev-server --mode development",
+    "build": "run-p build:*",
+    "watch": "run-p watch:*"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.10",
+    "@types/react-dom": "^16.8.3",
+    "@typescript-eslint/parser": "^1.5.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.16.4",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.4.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.2.1"
+  },
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "sanitize.css": "^8.0.0"
+  }
+}
