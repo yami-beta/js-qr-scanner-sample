@@ -32,6 +32,7 @@
     "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {
+    "jsqr": "^1.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "sanitize.css": "^8.0.0"

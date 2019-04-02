@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018", "dom", "webworker"],
     "jsx": "react",
     "strict": true,
     "sourceMap": true,
