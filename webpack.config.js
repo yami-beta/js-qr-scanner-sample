@@ -7,7 +7,8 @@ let publicPath = "/";
 module.exports = {
   mode: "development",
   entry: {
-    index: [path.join(__dirname, "src", "index.tsx")]
+    index: [path.join(__dirname, "src", "index.tsx")],
+    worker: [path.join(__dirname, "src", "worker.ts")]
   },
   output: {
     path: path.join(__dirname, "dist"),
@@ -28,6 +29,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
+      chunks: ["index"],
       template: path.join(__dirname, "src", "index.html")
     }),
     new CopyWebpackPlugin([
