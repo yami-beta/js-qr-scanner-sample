@@ -1,4 +1,6 @@
+/** @jsx jsx */
 import React, { useEffect, useState, useRef } from "react";
+import { css, jsx } from "@emotion/core";
 
 const QRScanner: React.FC<{}> = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -42,6 +44,20 @@ const QRScanner: React.FC<{}> = () => {
 
     return () => {
       clearInterval(timer);
+
+      // カメラの停止処理
+      const video = videoRef.current;
+      if (!video) {
+        return;
+      }
+      const stream = video.srcObject as MediaStream | null;
+      if (!stream) {
+        return;
+      }
+      stream.getTracks().forEach(track => {
+        track.stop();
+      });
+      video.srcObject = null;
     };
   }, [videoRef, canvasRef]);
 
@@ -78,24 +94,67 @@ const QRScanner: React.FC<{}> = () => {
     };
   }, [canvasRef]);
   return (
-    <div>
+    <div css={qrScannerStyle}>
       {cameraError && (
-        <div>
-          <p>Error</p>
-          <pre>{cameraError.message}</pre>
+        <div css={errorListStyle}>
+          <div css={errorMessageStyle}>
+            <p css={errorTextStyle}>Error</p>
+            <pre css={errorTextStyle}>{cameraError.message}</pre>
+          </div>
         </div>
       )}
-      {!cameraError && <video ref={videoRef} width={640} height={480} />}
+
+      <div css={cameraAreaStyle}>
+        <video ref={videoRef} css={videoStyle} />
+      </div>
+
       {qrData && (
-        <div>
-          <h2>Result</h2>
-          <pre>
-            <code>{qrData}</code>
-          </pre>
+        <div css={resultAreaStyle}>
+          <h2 css={resulth2Style}>Result</h2>
+          <pre css={resultPreStyle}>{qrData}</pre>
         </div>
       )}
     </div>
   );
 };
+
+const qrScannerStyle = css`
+  padding: 10px 0;
+`;
+
+const cameraAreaStyle = css`
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.54);
+`;
+
+const videoStyle = css`
+  width: 100%;
+`;
+
+const errorListStyle = css`
+  padding: 10px 0;
+`;
+const errorMessageStyle = css`
+  padding: 10px;
+  background-color: rgba(232, 17, 35, 0.2);
+  border-radius: 5px;
+`;
+const errorTextStyle = css`
+  margin: 0;
+  padding: 0.5em 0;
+`;
+
+const resultAreaStyle = css`
+  padding: 20px 0;
+`;
+const resulth2Style = css`
+  margin: 0;
+  padding: 0 0 10px;
+`;
+const resultPreStyle = css`
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 10px 0;
+`;
 
 export { QRScanner };
