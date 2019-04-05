@@ -14,6 +14,9 @@
     "build": "run-p build:*",
     "watch": "run-p watch:*"
   },
+  "resolutions": {
+    "@types/react": "^16.8.10"
+  },
   "devDependencies": {
     "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
@@ -32,6 +35,7 @@
     "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {
+    "@emotion/core": "^10.0.10",
     "jsqr": "^1.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
