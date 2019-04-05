@@ -1,1 +1,1 @@
-# react-boilerplate
+# js-qr-scanner-sample
