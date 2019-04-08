@@ -105,7 +105,7 @@ const QRScanner: React.FC<{}> = () => {
       )}
 
       <div css={cameraAreaStyle}>
-        <video ref={videoRef} css={videoStyle} />
+        <video ref={videoRef} autoPlay playsInline css={videoStyle} />
       </div>
 
       {qrData && (
