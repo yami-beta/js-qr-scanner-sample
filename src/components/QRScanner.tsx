@@ -1,17 +1,18 @@
 /** @jsx jsx */
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import { css, jsx } from "@emotion/core";
 
 const QRScanner: React.FC<{}> = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
+  const [facingMode, setFacingMode] = useState<string>("user");
   const [cameraError, setCameraError] = useState<Error>();
   const [qrData, setQrData] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let timer: any;
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      .getUserMedia({ video: { facingMode } })
       .then(mediaStream => {
         const video = videoRef.current;
         if (!video) {
@@ -59,7 +60,7 @@ const QRScanner: React.FC<{}> = () => {
       });
       video.srcObject = null;
     };
-  }, [videoRef, canvasRef]);
+  }, [videoRef, canvasRef, facingMode]);
 
   useEffect(() => {
     let timer: any;
@@ -93,6 +94,14 @@ const QRScanner: React.FC<{}> = () => {
       clearTimeout(timer);
     };
   }, [canvasRef]);
+
+  const handleRadio = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.currentTarget.value) {
+      return;
+    }
+    setFacingMode(event.currentTarget.value);
+  };
+
   return (
     <div css={qrScannerStyle}>
       {cameraError && (
@@ -103,6 +112,33 @@ const QRScanner: React.FC<{}> = () => {
           </div>
         </div>
       )}
+
+      <div css={selectFacingAreaStyle}>
+        <div css={facingModeItemStyle}>
+          <label>
+            <input
+              type="radio"
+              name="facingMode"
+              value="user"
+              checked={facingMode === "user"}
+              onChange={handleRadio}
+            />
+            <span>フロントカメラ</span>
+          </label>
+        </div>
+        <div css={facingModeItemStyle}>
+          <label>
+            <input
+              type="radio"
+              name="facingMode"
+              value="environment"
+              checked={facingMode === "environment"}
+              onChange={handleRadio}
+            />
+            <span>背面カメラ</span>
+          </label>
+        </div>
+      </div>
 
       <div css={cameraAreaStyle}>
         <video ref={videoRef} autoPlay playsInline css={videoStyle} />
@@ -142,6 +178,21 @@ const errorMessageStyle = css`
 const errorTextStyle = css`
   margin: 0;
   padding: 0.5em 0;
+`;
+
+const selectFacingAreaStyle = css`
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+`;
+const facingModeItemStyle = css`
+  padding: 0 0.5em 0 0;
+  & > label {
+    cursor: pointer;
+  }
+  span {
+    padding: 0 0 0 0.5em;
+  }
 `;
 
 const resultAreaStyle = css`
