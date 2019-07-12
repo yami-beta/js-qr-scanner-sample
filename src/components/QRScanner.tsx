@@ -1,10 +1,17 @@
 /** @jsx jsx */
-import React, { useEffect, useState, useRef, ChangeEvent } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+  MouseEvent
+} from "react";
 import { css, jsx } from "@emotion/core";
 
 const QRScanner: React.FC<{}> = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [facingMode, setFacingMode] = useState<string>("user");
   const [cameraError, setCameraError] = useState<Error>();
   const [qrData, setQrData] = useState<string | undefined>(undefined);
@@ -102,6 +109,15 @@ const QRScanner: React.FC<{}> = () => {
     setFacingMode(event.currentTarget.value);
   };
 
+  const handleClickCopy = (event: MouseEvent<HTMLButtonElement>) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+    textarea.select();
+    document.execCommand("copy");
+  };
+
   return (
     <div css={qrScannerStyle}>
       {cameraError && (
@@ -146,8 +162,13 @@ const QRScanner: React.FC<{}> = () => {
 
       {qrData && (
         <div css={resultAreaStyle}>
-          <h2 css={resulth2Style}>Result</h2>
-          <pre css={resultPreStyle}>{qrData}</pre>
+          <h2 css={resultH2Style}>Result</h2>
+          <textarea
+            css={resultTextAreaStyle}
+            defaultValue={qrData}
+            ref={textareaRef}
+          />
+          <button onClick={handleClickCopy}>Copy</button>
         </div>
       )}
     </div>
@@ -198,14 +219,14 @@ const facingModeItemStyle = css`
 const resultAreaStyle = css`
   padding: 20px 0;
 `;
-const resulth2Style = css`
+const resultH2Style = css`
   margin: 0;
   padding: 0 0 10px;
 `;
-const resultPreStyle = css`
-  white-space: pre-wrap;
-  margin: 0;
-  padding: 10px 0;
+const resultTextAreaStyle = css`
+  width: 100%;
+  min-height: 4em;
+  padding: 5px;
 `;
 
 export { QRScanner };
