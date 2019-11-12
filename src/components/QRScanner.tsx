@@ -7,6 +7,9 @@ import React, {
   MouseEvent
 } from "react";
 import { css, jsx } from "@emotion/core";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 const QRScanner: React.FC<{}> = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -15,13 +18,22 @@ const QRScanner: React.FC<{}> = () => {
   const [facingMode, setFacingMode] = useState<string>("user");
   const [cameraError, setCameraError] = useState<Error>();
   const [qrData, setQrData] = useState<string | undefined>(undefined);
+  const [showScanner, setShowScanner] = useState<boolean>(false);
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setShowScanner(prev => !prev);
+  };
 
   useEffect(() => {
+    if (!showScanner) {
+      return;
+    }
+
+    const video = videoRef.current;
     let timer: any;
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode } })
       .then(mediaStream => {
-        const video = videoRef.current;
         if (!video) {
           return;
         }
@@ -54,7 +66,6 @@ const QRScanner: React.FC<{}> = () => {
       clearInterval(timer);
 
       // カメラの停止処理
-      const video = videoRef.current;
       if (!video) {
         return;
       }
@@ -67,23 +78,31 @@ const QRScanner: React.FC<{}> = () => {
       });
       video.srcObject = null;
     };
-  }, [videoRef, canvasRef, facingMode]);
+  }, [facingMode, showScanner]);
+
+  const [stopWorker, setStopWorker] = useState(false);
 
   useEffect(() => {
+    if (!showScanner) {
+      return;
+    }
     let timer: any;
+    const canvas = canvasRef.current;
     const worker = new Worker("worker.js");
     worker.addEventListener("message", event => {
       if (event.data) {
         setQrData(event.data);
+        setStopWorker(true);
+      }
+      if (stopWorker) {
         return;
       }
       timer = setTimeout(() => {
         sendWorker();
-      }, 1000);
+      }, 500);
     });
 
     const sendWorker = () => {
-      const canvas = canvasRef.current;
       if (!canvas) {
         return;
       }
@@ -100,7 +119,7 @@ const QRScanner: React.FC<{}> = () => {
     return () => {
       clearTimeout(timer);
     };
-  }, [canvasRef]);
+  }, [showScanner, stopWorker]);
 
   const handleRadio = (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.currentTarget.value) {
@@ -120,6 +139,15 @@ const QRScanner: React.FC<{}> = () => {
 
   return (
     <div css={qrScannerStyle}>
+      <div css={buttonListStyle}>
+        <button
+          css={showScanner ? stopButtonStyle : buttonStyle}
+          onClick={handleClick}
+        >
+          {showScanner ? "カメラを停止する" : "カメラを起動する"}
+        </button>
+      </div>
+
       {cameraError && (
         <div css={errorListStyle}>
           <div css={errorMessageStyle}>
@@ -160,7 +188,7 @@ const QRScanner: React.FC<{}> = () => {
         <video ref={videoRef} autoPlay playsInline css={videoStyle} />
       </div>
 
-      {qrData && (
+      <Modal isOpen={!!qrData}>
         <div css={resultAreaStyle}>
           <h2 css={resultH2Style}>Result</h2>
           <textarea
@@ -169,8 +197,16 @@ const QRScanner: React.FC<{}> = () => {
             ref={textareaRef}
           />
           <button onClick={handleClickCopy}>Copy</button>
+          <button
+            onClick={() => {
+              setQrData(undefined);
+              setStopWorker(false);
+            }}
+          >
+            Close
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };
@@ -179,6 +215,29 @@ const qrScannerStyle = css`
   padding: 10px 0;
 `;
 
+const buttonListStyle = css`
+  display: flex;
+  justify-content: center;
+  padding: 0 0 10px;
+`;
+const buttonStyle = css`
+  padding: 0.5em;
+  outline: none;
+  color: rgba(255, 255, 255, 1);
+  background-color: rgba(0, 120, 212, 1);
+  border: none;
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(0, 120, 212, 0.8);
+  }
+`;
+const stopButtonStyle = css`
+  ${buttonStyle};
+  background-color: rgba(232, 17, 35, 1);
+  &:hover {
+    background-color: rgba(232, 17, 35, 0.8);
+  }
+`;
 const cameraAreaStyle = css`
   padding: 10px;
   border: 1px solid rgba(0, 0, 0, 0.54);
@@ -186,6 +245,7 @@ const cameraAreaStyle = css`
 
 const videoStyle = css`
   width: 100%;
+  max-height: 50vh;
 `;
 
 const errorListStyle = css`
