@@ -7,6 +7,7 @@ import React, {
   MouseEvent
 } from "react";
 import { css, jsx } from "@emotion/core";
+import lottie, { AnimationItem } from "lottie-web";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
@@ -23,6 +24,36 @@ const QRScanner: React.FC<{}> = () => {
     event.preventDefault();
     setShowScanner(prev => !prev);
   };
+  const lottieRef = useRef<HTMLDivElement>(null);
+  const [anim, setAnim] = useState<AnimationItem | undefined>(undefined);
+  const [showLottie, setShowLottie] = useState(false);
+
+  useEffect(() => {
+    const lottieEl = lottieRef.current;
+    if (!lottieEl) {
+      return;
+    }
+
+    const anim = lottie.loadAnimation({
+      container: lottieEl,
+      renderer: "svg",
+      loop: false,
+      autoplay: false,
+      path: "https://assets9.lottiefiles.com/packages/lf20_qAlCfE.json"
+    });
+
+    anim.addEventListener("complete", event => {
+      setShowLottie(false);
+    });
+
+    setAnim(anim);
+  }, []);
+
+  useEffect(() => {
+    if (showLottie && anim) {
+      anim.goToAndPlay(0);
+    }
+  }, [anim, showLottie]);
 
   useEffect(() => {
     if (!showScanner) {
@@ -91,6 +122,7 @@ const QRScanner: React.FC<{}> = () => {
     const worker = new Worker("worker.js");
     worker.addEventListener("message", event => {
       if (event.data) {
+        setShowLottie(true);
         setQrData(event.data);
         setStopWorker(true);
       }
@@ -185,10 +217,24 @@ const QRScanner: React.FC<{}> = () => {
       </div>
 
       <div css={cameraAreaStyle}>
-        <video ref={videoRef} autoPlay playsInline css={videoStyle} />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          css={css`
+            ${videoStyle};
+            display: ${showLottie ? "none" : "block"};
+          `}
+        />
+        <div
+          ref={lottieRef}
+          css={css`
+            display: ${showLottie ? "block" : "none"};
+          `}
+        ></div>
       </div>
 
-      <Modal isOpen={!!qrData}>
+      <Modal isOpen={!!qrData && !showLottie}>
         <div css={resultAreaStyle}>
           <h2 css={resultH2Style}>Result</h2>
           <textarea
